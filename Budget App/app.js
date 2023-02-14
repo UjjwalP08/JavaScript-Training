@@ -36,18 +36,18 @@ var budgetController = (function () {
     //   Budget Controller Code
 
     // Adding the constructor for the Income and Expanse 
-    var Expanse = function(id,description,value)
+    var Expanse = function(id,description,amount)
     {
         this.id = id;
         this.description = description;
-        this.value = value;
+        this.amount = amount;
     }
 
-    var Income = function(id,description,value)
+    var Income = function(id,description,amount)
     {
         this.id = id;
         this.description = description;
-        this.value = value;
+        this.amount = amount;
     }
 
     // To store the exapnses and income of all the entry we enter we need one data structre to store all entred income and expanses
@@ -58,11 +58,54 @@ var budgetController = (function () {
     var data = {
          allItems:{
             exp:[],
-            inco:[]
+            inc:[]
         },
         total:{
             exp:0,
-            inco:0
+            inc:0
+        }
+    }
+
+    // Adding the item in data object and categorize in the inco and exp
+    // For that we need to create a public method
+
+    return {
+        addItems:function(type,desc,amount)
+        {
+                var newItem,ID;
+
+                if(ID >0)
+                {
+                    ID= data.allItems[type][data.allItems[type].length - 1].id + 1;
+                    // .id is help to retrive the element on the given index
+                }
+                else{
+                    ID = 0;
+                }
+                // we can't uses the index of an array because if we start to remvoe the items it will change the index of item as well as chagne the id of the item also 
+                // if our array is [1,2,3,4,5,6,7,8] and if  we delete the element 3,4,5
+                // so new array is [1,2,6,7,8] if we want to insert new element so we want the 
+                // id = 9 that we get using above ID formula
+
+                // create newItem basec on type inc and exp
+                if(type === 'exp')
+                {
+                    // create the instace of Expanses Constructor
+                    newItem = new Expanse(ID,desc,amount);
+                }
+                else if(type === 'inc')
+                {
+                    // cerate the instance of Income Constructor
+                    newItem = new Income(ID,desc,amount);
+                }
+                // Push the value of ITEM as per it's type
+                data.allItems[type].push(newItem);
+
+        },
+
+        testing:function()
+        {
+            console.log(data)
         }
     }
 
@@ -117,11 +160,14 @@ var Controller = (function (budgetCtrl, UICtrl) {
     // We need to perfom same event on the click_btn and Enter_key_press
     // so if we write the both code in the same function it's not follow the DRY Principle so to follow the DRY(Do not Repeat Your code ) we use the one function or function expression and wrap the code inside it
 
-    var addItem = function () {
+    var insertItem = function () {
+        var input,newItem;
         // 1. Get the value of field of input data
-        var get_input_value = UICtrl.getInput();
-        console.log(get_input_value);
+         input = UICtrl.getInput();
+        // console.log(input);
         // 2. Add the item to the budget controller
+        newItem = budgetCtrl.addItems(input.type,input.description,input.amount)
+
         // 3. Add the item to the UI
         // 4. Calculate the budget
         // 5. Display the Budget on th UI
@@ -137,7 +183,7 @@ var Controller = (function (budgetCtrl, UICtrl) {
 
         // Use the Event Listner here for click
         var click_btn = document.querySelector(DOM_class.add_btn);
-        click_btn.addEventListener("click", addItem);
+        click_btn.addEventListener("click", insertItem);
 
         // We need the Enter Key event listner also because when we get the value form the user press the Enter Key at that time also we need to store the value
 
@@ -149,7 +195,7 @@ var Controller = (function (budgetCtrl, UICtrl) {
                 // console.log(event);
 
                 if (event.key === "Enter") {
-                    addItem();
+                    insertItem();
                 }
         });
     };
