@@ -34,6 +34,39 @@
 // Create the Data Module with use the IIFE and Closure
 var budgetController = (function () {
     //   Budget Controller Code
+
+    // Adding the constructor for the Income and Expanse 
+    var Expanse = function(id,description,value)
+    {
+        this.id = id;
+        this.description = description;
+        this.value = value;
+    }
+
+    var Income = function(id,description,value)
+    {
+        this.id = id;
+        this.description = description;
+        this.value = value;
+    }
+
+    // To store the exapnses and income of all the entry we enter we need one data structre to store all entred income and expanses
+    // we use variable but it make too much complex our project to understan our project so,
+    // we use object which store all the value of data
+    // use an array to store the all the income and expanses
+
+    var data = {
+         allItems:{
+            exp:[],
+            inco:[]
+        },
+        total:{
+            exp:0,
+            inco:0
+        }
+    }
+
+
 })();
 // Here we use IIFE function to create the module so the all the method and variable in side the budgetController is private which is not able to access outside the IIFE function but here we use the one closure which is able to access outside the IIFE
 
