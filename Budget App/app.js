@@ -101,6 +101,9 @@ var budgetController = (function () {
                 // Push the value of ITEM as per it's type
                 data.allItems[type].push(newItem);
 
+                // return the newItem
+                return newItem;
+
         },
 
         testing:function()
@@ -127,6 +130,8 @@ var UIcontroller = (function () {
         inputDesc: ".add__description",
         inputValue: ".add__value",
         add_btn: ".add__btn",
+        incomeContainer:".income__list",
+        expanseContainer:".expenses__list"
     };
 
     // Here we need to return the value of the inputs
@@ -140,7 +145,37 @@ var UIcontroller = (function () {
                 // if the class name of the field is change we need to change is as many time we use in the places we use so , if the class name is chagne we create and object here which store the name of all the classes we use so if any change happen we need to change on the object value
             };
         },
-        //    work as getter that work in OOPs
+        showOnUI:function (obj,type) {
+
+            var template,update_template,element;
+
+            // create the HTML string with placeholder text
+            // % text % it is the placeholder 
+            // here place holder is {%id%}{%desc%}{%amount%}
+
+            if(type === 'inc')
+            {
+                element = DOM_Strings.incomeContainer;
+                console.log(element);
+                template = '<div class="item clearfix" id="%id%"><div class="item__description">%desc%</div><div class="right clearfix"><div class="item__value">%amount%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
+            }else if(type === 'exp')
+            {
+                element = DOM_Strings.expanseContainer;
+                console.log(element);
+                template = '<div class="item clearfix" id="%id%"><div class="item__description">%desc%</div><div class="right clearfix"><div class="item__value">%amount%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
+            }
+
+            // replace the %placehodler% with actual value that we get from the object
+            update_template = template.replace('%id%',obj.id)
+            update_template = update_template.replace('%desc%',obj.description);
+            update_template = update_template.replace('%amount%',obj.amount);
+
+            // Update the Element on the UI
+            document.querySelector(element).insertAdjacentHTML('beforeend',update_template);
+
+
+        },
+        //    work like getter that work in OOPs
         getDomString: function () {
             return DOM_Strings;
         },
@@ -167,8 +202,10 @@ var Controller = (function (budgetCtrl, UICtrl) {
         // console.log(input);
         // 2. Add the item to the budget controller
         newItem = budgetCtrl.addItems(input.type,input.description,input.amount)
+        // console.log((newItem));
 
         // 3. Add the item to the UI
+        UICtrl.showOnUI(newItem,input.type);
         // 4. Calculate the budget
         // 5. Display the Budget on th UI
 
