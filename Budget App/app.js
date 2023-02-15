@@ -156,12 +156,10 @@ var UIcontroller = (function () {
             if(type === 'inc')
             {
                 element = DOM_Strings.incomeContainer;
-                console.log(element);
                 template = '<div class="item clearfix" id="%id%"><div class="item__description">%desc%</div><div class="right clearfix"><div class="item__value">%amount%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
             }else if(type === 'exp')
             {
                 element = DOM_Strings.expanseContainer;
-                console.log(element);
                 template = '<div class="item clearfix" id="%id%"><div class="item__description">%desc%</div><div class="right clearfix"><div class="item__value">%amount%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
             }
 
@@ -175,6 +173,30 @@ var UIcontroller = (function () {
 
 
         },
+        // Input Fields Create Function execut after the value added
+        clearFields:function ()
+        {
+            var fields,fieldArr;
+
+            // Select description and amount field
+
+            fields = document.querySelectorAll(DOM_Strings.inputDesc +', '+ DOM_Strings.inputValue);
+            
+            // Now we use the slice function to slice form the ,
+            // but fiedls is not array it is string value so
+            fieldArr = Array.prototype.slice.call(fields);
+
+            // Use for-each loop to travarse it
+            fieldArr.forEach(function(curr,index,array){
+                curr.value="";
+            });
+
+            fieldArr[0].focus();
+            
+
+        },
+
+
         //    work like getter that work in OOPs
         getDomString: function () {
             return DOM_Strings;
@@ -206,8 +228,12 @@ var Controller = (function (budgetCtrl, UICtrl) {
 
         // 3. Add the item to the UI
         UICtrl.showOnUI(newItem,input.type);
-        // 4. Calculate the budget
-        // 5. Display the Budget on th UI
+        
+        // 4. Clear the input Fields
+        UICtrl.clearFields();
+
+        // 5. Calculate the budget
+        // 6. Display the Budget on th UI
 
         // to check wether function is working or not
         // console.log("Event Fire");
