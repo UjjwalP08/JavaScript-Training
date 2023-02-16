@@ -56,7 +56,7 @@ var budgetController = (function () {
         });
 
         data.total[type] = sum;
-    }
+    };
 
     // To store the exapnses and income of all the entry we enter we need one data structre to store all entred income and expanses
     // we use variable but it make too much complex our project to understan our project so,
@@ -73,7 +73,6 @@ var budgetController = (function () {
             inc: 0
         },
         budget: 0,
-
         percentage: -1
     }
 
@@ -116,14 +115,18 @@ var budgetController = (function () {
         budgetCalculate: function () {
 
             // 1. Calculate the total income and expanse
-            calculateToatal('inc')
             calculateToatal('exp')
+            calculateToatal('inc')
 
             // 2. CalculateBudget = income - expanse
             data.budget = data.total.inc - data.total.exp;
 
             // 3. Calculate the percentage of income we spent
-            data.percentage = Math.round((data.total.exp / data.total.inc) * 100);
+            if(data.total.inc >0)
+                data.percentage = Math.round((data.total.exp / data.total.inc) * 100);
+            else
+                data.percentage = -1;
+
 
         },
 
@@ -161,7 +164,11 @@ var UIcontroller = (function () {
         inputValue: ".add__value",
         add_btn: ".add__btn",
         incomeContainer: ".income__list",
-        expanseContainer: ".expenses__list"
+        expanseContainer: ".expenses__list",
+        budgetLable:".budget__value",
+        incomeLable:".budget__income--value",
+        expanseLable:".budget__expenses--value",
+        percentageLable:".budget__expenses--percentage"
     };
 
     // Here we need to return the value of the inputs
@@ -215,13 +222,31 @@ var UIcontroller = (function () {
             fieldArr = Array.prototype.slice.call(fields);
 
             // Use for-each loop to travarse it
-            fieldArr.forEach(function (curr, index, array) {
+            fieldArr.forEach(function (curr) {
                 curr.value = "";
             });
 
             fieldArr[0].focus();
 
 
+        },
+
+        diplayBudget:function(obj)
+        {
+            
+            document.querySelector(DOM_Strings.budgetLable).textContent = obj.budget;
+            document.querySelector(DOM_Strings.incomeLable).textContent = obj.totalIncome;
+            document.querySelector(DOM_Strings.expanseLable).textContent = obj.totalExpanse;
+            
+            if(obj.percentage > 0)
+            {
+                document.querySelector(DOM_Strings.percentageLable).textContent = obj.percentage + "%";
+            }
+            else
+            {
+                document.querySelector(DOM_Strings.percentageLable).textContent = "---";
+
+            }
         },
 
 
@@ -282,11 +307,12 @@ var Controller = (function (budgetCtrl, UICtrl) {
         budgetCtrl.budgetCalculate();
 
         // 6. Return the budget
-        var answer = budgetCtrl.getBudget();
+        var answers = budgetCtrl.getBudget();
 
-        console.log(answer);
+        // console.log(answer);
 
         // 7. Display the Budget on th UI
+        UICtrl.diplayBudget(answers);
     }
 
     // Set up the eventlistner in one function which execute only when the our applicaiton is started
@@ -317,6 +343,13 @@ var Controller = (function (budgetCtrl, UICtrl) {
     return {
         init: function () {
             console.log("Application is started");
+            // initally all the values are 0
+            UICtrl.diplayBudget({
+            budget:0,
+            percentage:0,
+            totalIncome:0,
+            totalExpanse:0
+            })
             setupEvnetnListnere();
         }
     }
