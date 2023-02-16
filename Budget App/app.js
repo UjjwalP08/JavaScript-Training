@@ -36,18 +36,26 @@ var budgetController = (function () {
     //   Budget Controller Code
 
     // Adding the constructor for the Income and Expanse 
-    var Expanse = function(id,description,amount)
-    {
+    var Expanse = function (id, description, amount) {
         this.id = id;
         this.description = description;
         this.amount = amount;
     }
 
-    var Income = function(id,description,amount)
-    {
+    var Income = function (id, description, amount) {
         this.id = id;
         this.description = description;
         this.amount = amount;
+    }
+
+    var calculateToatal = function (type) {
+        var sum = 0;
+
+        data.allItems[type].forEach(function (curr) {
+            sum = sum + curr.amount;
+        });
+
+        data.total[type] = sum;
     }
 
     // To store the exapnses and income of all the entry we enter we need one data structre to store all entred income and expanses
@@ -56,58 +64,80 @@ var budgetController = (function () {
     // use an array to store the all the income and expanses
 
     var data = {
-         allItems:{
-            exp:[],
-            inc:[]
+        allItems: {
+            exp: [],
+            inc: []
         },
-        total:{
-            exp:0,
-            inc:0
-        }
+        total: {
+            exp: 0,
+            inc: 0
+        },
+        budget: 0,
+
+        percentage: -1
     }
 
     // Adding the item in data object and categorize in the inco and exp
     // For that we need to create a public method
 
     return {
-        addItems:function(type,desc,amount)
-        {
-                var newItem,ID;
+        addItems: function (type, desc, amount) {
+            var newItem, ID;
 
-                if(data.allItems[type].length >0)
-                {
-                    ID= data.allItems[type][data.allItems[type].length - 1].id + 1;
-                    // .id is help to retrive the element on the given index
-                }
-                else{
-                    ID = 0;
-                }
-                // we can't uses the index of an array because if we start to remvoe the items it will change the index of item as well as chagne the id of the item also 
-                // if our array is [1,2,3,4,5,6,7,8] and if  we delete the element 3,4,5
-                // so new array is [1,2,6,7,8] if we want to insert new element so we want the 
-                // id = 9 that we get using above ID formula
+            if (data.allItems[type].length > 0) {
+                ID = data.allItems[type][data.allItems[type].length - 1].id + 1;
+                // .id is help to retrive the element on the given index
+            }
+            else {
+                ID = 0;
+            }
+            // we can't uses the index of an array because if we start to remvoe the items it will change the index of item as well as chagne the id of the item also 
+            // if our array is [1,2,3,4,5,6,7,8] and if  we delete the element 3,4,5
+            // so new array is [1,2,6,7,8] if we want to insert new element so we want the 
+            // id = 9 that we get using above ID formula
 
-                // create newItem basec on type inc and exp
-                if(type === 'exp')
-                {
-                    // create the instace of Expanses Constructor
-                    newItem = new Expanse(ID,desc,amount);
-                }
-                else if(type === 'inc')
-                {
-                    // cerate the instance of Income Constructor
-                    newItem = new Income(ID,desc,amount);
-                }
-                // Push the value of ITEM as per it's type
-                data.allItems[type].push(newItem);
+            // create newItem basec on type inc and exp
+            if (type === 'exp') {
+                // create the instace of Expanses Constructor
+                newItem = new Expanse(ID, desc, amount);
+            }
+            else if (type === 'inc') {
+                // cerate the instance of Income Constructor
+                newItem = new Income(ID, desc, amount);
+            }
+            // Push the value of ITEM as per it's type
+            data.allItems[type].push(newItem);
 
-                // return the newItem
-                return newItem;
+            // return the newItem
+            return newItem;
 
         },
 
-        testing:function()
+        budgetCalculate: function () {
+
+            // 1. Calculate the total income and expanse
+            calculateToatal('inc')
+            calculateToatal('exp')
+
+            // 2. CalculateBudget = income - expanse
+            data.budget = data.total.inc - data.total.exp;
+
+            // 3. Calculate the percentage of income we spent
+            data.percentage = Math.round((data.total.exp / data.total.inc) * 100);
+
+        },
+
+        getBudget:function()
         {
+            return{
+                budget:data.budget,
+                percentage:data.percentage,
+                totalIncome:data.total.inc,
+                totalExpanse:data.total.exp
+            }
+        },
+
+        testing: function () {
             console.log(data)
         }
     }
@@ -130,8 +160,8 @@ var UIcontroller = (function () {
         inputDesc: ".add__description",
         inputValue: ".add__value",
         add_btn: ".add__btn",
-        incomeContainer:".income__list",
-        expanseContainer:".expenses__list"
+        incomeContainer: ".income__list",
+        expanseContainer: ".expenses__list"
     };
 
     // Here we need to return the value of the inputs
@@ -146,54 +176,51 @@ var UIcontroller = (function () {
                 // amount is data type is float not a string so that why we use the parseFloat 
             };
         },
-        showOnUI:function (obj,type) {
+        showOnUI: function (obj, type) {
 
-            var template,update_template,element;
+            var template, update_template, element;
 
             // create the HTML string with placeholder text
             // % text % it is the placeholder 
             // here place holder is {%id%}{%desc%}{%amount%}
 
-            if(type === 'inc')
-            {
+            if (type === 'inc') {
                 element = DOM_Strings.incomeContainer;
                 template = '<div class="item clearfix" id="%id%"><div class="item__description">%desc%</div><div class="right clearfix"><div class="item__value">%amount%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
-            }else if(type === 'exp')
-            {
+            } else if (type === 'exp') {
                 element = DOM_Strings.expanseContainer;
                 template = '<div class="item clearfix" id="%id%"><div class="item__description">%desc%</div><div class="right clearfix"><div class="item__value">%amount%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
             }
 
             // replace the %placehodler% with actual value that we get from the object
-            update_template = template.replace('%id%',obj.id)
-            update_template = update_template.replace('%desc%',obj.description);
-            update_template = update_template.replace('%amount%',obj.amount);
+            update_template = template.replace('%id%', obj.id)
+            update_template = update_template.replace('%desc%', obj.description);
+            update_template = update_template.replace('%amount%', obj.amount);
 
             // Update the Element on the UI
-            document.querySelector(element).insertAdjacentHTML('beforeend',update_template);
+            document.querySelector(element).insertAdjacentHTML('beforeend', update_template);
 
 
         },
         // Input Fields Create Function execut after the value added
-        clearFields:function ()
-        {
-            var fields,fieldArr;
+        clearFields: function () {
+            var fields, fieldArr;
 
             // Select description and amount field
 
-            fields = document.querySelectorAll(DOM_Strings.inputDesc +', '+ DOM_Strings.inputValue);
-            
+            fields = document.querySelectorAll(DOM_Strings.inputDesc + ', ' + DOM_Strings.inputValue);
+
             // Now we use the slice function to slice form the ,
             // but fiedls is not array it is string value so
             fieldArr = Array.prototype.slice.call(fields);
 
             // Use for-each loop to travarse it
-            fieldArr.forEach(function(curr,index,array){
-                curr.value="";
+            fieldArr.forEach(function (curr, index, array) {
+                curr.value = "";
             });
 
             fieldArr[0].focus();
-            
+
 
         },
 
@@ -219,41 +246,46 @@ var Controller = (function (budgetCtrl, UICtrl) {
     // so if we write the both code in the same function it's not follow the DRY Principle so to follow the DRY(Do not Repeat Your code ) we use the one function or function expression and wrap the code inside it
 
     var insertItem = function () {
-        var input,newItem;
+        var input, newItem;
         // 1. Get the value of field of input data
-         input = UICtrl.getInput();
+        input = UICtrl.getInput();
         // console.log(input);
-        
+
         // We need to exectue below description field only when there is some string in description and amount is number
         // no need to execute when the description field empty and amount in NAN and amount is === 0
 
-        if(input.description !== "" && !isNaN(input.amount) && input.amount!== 0)
-        {
+        if (input.description !== "" && !isNaN(input.amount) && input.amount !== 0) {
 
 
-        // 2. Add the item to the budget controller
-        newItem = budgetCtrl.addItems(input.type,input.description,input.amount)
-        // console.log((newItem));
+            // 2. Add the item to the budget controller
+            newItem = budgetCtrl.addItems(input.type, input.description, input.amount)
+            // console.log((newItem));
 
-        // 3. Add the item to the UI
-        UICtrl.showOnUI(newItem,input.type);
-        
-        // 4. Clear the input Fields
-        UICtrl.clearFields();
+            // 3. Add the item to the UI
+            UICtrl.showOnUI(newItem, input.type);
+
+            // 4. Clear the input Fields
+            UICtrl.clearFields();
+
+            // updateBudget
+            updateBudget();
 
         }
-        
+
 
         // to check wether function is working or not
         // console.log("Event Fire");
     };
 
-    var updateBudget = function()
-    {
+    var updateBudget = function () {
         // 5. Calculate the budget
+        budgetCtrl.budgetCalculate();
 
         // 6. Return the budget
-        
+        var answer = budgetCtrl.getBudget();
+
+        console.log(answer);
+
         // 7. Display the Budget on th UI
     }
 
@@ -269,23 +301,21 @@ var Controller = (function (budgetCtrl, UICtrl) {
 
         // We need the Enter Key event listner also because when we get the value form the user press the Enter Key at that time also we need to store the value
 
-        var Enter_key_press = document.addEventListener("keypress",function (event) 
-        {
-                // keypress event is execute when any key press on the keyboard
-                // To identify the Enter key we use the keycode and to use the key we need to pass and event as an argument in eventlistener function
+        var Enter_key_press = document.addEventListener("keypress", function (event) {
+            // keypress event is execute when any key press on the keyboard
+            // To identify the Enter key we use the keycode and to use the key we need to pass and event as an argument in eventlistener function
 
-                // console.log(event);
+            // console.log(event);
 
-                if (event.key === "Enter") {
-                    insertItem();
-                }
+            if (event.key === "Enter") {
+                insertItem();
+            }
         });
     };
 
     // return object which make our applicaiton start
     return {
-        init:function()
-        {
+        init: function () {
             console.log("Application is started");
             setupEvnetnListnere();
         }
