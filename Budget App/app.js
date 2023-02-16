@@ -141,8 +141,9 @@ var UIcontroller = (function () {
             return {
                 type: document.querySelector(DOM_Strings.inputType).value, // for value +(inc) and for -(exp)
                 description: document.querySelector(DOM_Strings.inputDesc).value,
-                amount: document.querySelector(DOM_Strings.inputValue).value,
+                amount: parseFloat(document.querySelector(DOM_Strings.inputValue).value)
                 // if the class name of the field is change we need to change is as many time we use in the places we use so , if the class name is chagne we create and object here which store the name of all the classes we use so if any change happen we need to change on the object value
+                // amount is data type is float not a string so that why we use the parseFloat 
             };
         },
         showOnUI:function (obj,type) {
@@ -222,6 +223,14 @@ var Controller = (function (budgetCtrl, UICtrl) {
         // 1. Get the value of field of input data
          input = UICtrl.getInput();
         // console.log(input);
+        
+        // We need to exectue below description field only when there is some string in description and amount is number
+        // no need to execute when the description field empty and amount in NAN and amount is === 0
+
+        if(input.description !== "" && !isNaN(input.amount) && input.amount!== 0)
+        {
+
+
         // 2. Add the item to the budget controller
         newItem = budgetCtrl.addItems(input.type,input.description,input.amount)
         // console.log((newItem));
@@ -232,12 +241,22 @@ var Controller = (function (budgetCtrl, UICtrl) {
         // 4. Clear the input Fields
         UICtrl.clearFields();
 
-        // 5. Calculate the budget
-        // 6. Display the Budget on th UI
+        }
+        
 
         // to check wether function is working or not
         // console.log("Event Fire");
     };
+
+    var updateBudget = function()
+    {
+        // 5. Calculate the budget
+
+        // 6. Return the budget
+        
+        // 7. Display the Budget on th UI
+    }
+
     // Set up the eventlistner in one function which execute only when the our applicaiton is started
 
     var setupEvnetnListnere = function () {
