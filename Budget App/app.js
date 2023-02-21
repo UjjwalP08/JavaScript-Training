@@ -40,6 +40,21 @@ var budgetController = (function () {
         this.id = id;
         this.description = description;
         this.amount = amount;
+        this.percentage = -1;
+    }
+
+    Expanse.prototype.calcPercentage = function(totalIncome)
+    {
+        if(data.total.inc > 0)
+            this.percentage = Math.round((this.amount/totalIncome) * 100);
+        else
+            this.percentage = -1;
+    }
+
+    // Access the Percentage
+    Expanse.prototype.getPercentage = function()
+    {
+        return this.percentage;
     }
 
     var Income = function (id, description, amount) {
@@ -137,6 +152,22 @@ var budgetController = (function () {
                 totalIncome: data.total.inc,
                 totalExpanse: data.total.exp
             }
+        },
+
+        calculatePercentage: function()
+        {
+            data.allItems.exp.forEach(function(curr){
+                curr.calcPercentage(data.total.inc);
+            });
+        },
+
+        getPercentage: function()
+        {
+            var allPerc = data.allItems.exp.map(function(index){
+                return index.getPercentage();
+            })
+
+            return allPerc;
         },
 
         deleteItem:function(type,id)
@@ -319,6 +350,32 @@ var Controller = (function (budgetCtrl, UICtrl) {
     // We need to perfom same event on the click_btn and Enter_key_press
     // so if we write the both code in the same function it's not follow the DRY Principle so to follow the DRY(Do not Repeat Your code ) we use the one function or function expression and wrap the code inside it
 
+     // Function that Update the budget
+     var updateBudget = function () {
+        // 5. Calculate the budget
+        budgetCtrl.budgetCalculate();
+
+        // 6. Return the budget
+        var answers = budgetCtrl.getBudget();
+
+        // console.log(answer);
+
+        // 7. Display the Budget on th UI
+        UICtrl.diplayBudget(answers);
+    }
+
+    // Function update Percentage
+    var updatePercentage = function()
+    {
+        // 1. Calculate the Percentage
+        budgetCtrl.calculatePercentage();
+
+        // 2. Read percentage from the budget Controller
+        var percen = budgetCtrl.getPercentage();
+        // 3. Update percentage in UI
+        console.log(percen);
+    }
+
     var insertItem = function () {
         var input, newItem;
         // 1. Get the value of field of input data
@@ -341,9 +398,11 @@ var Controller = (function (budgetCtrl, UICtrl) {
             // 4. Clear the input Fields
             UICtrl.clearFields();
 
-            // updateBudget
+            // 5. updateBudget
             updateBudget();
-
+            
+            // 6. updateBudget
+            updatePercentage()
         }
 
     };
@@ -367,31 +426,15 @@ var Controller = (function (budgetCtrl, UICtrl) {
             // 2. Delete the item from UI
             UICtrl.deleteListItem(itemId);
 
-            // Recalculate the budget and Update it to UI
-            updateBudget()
+            // 3. Recalculate the budget and Update it to UI
+            updateBudget();
+
+            // 4. Update Percentage
+            updatePercentage();
 
         }
 
-
-
-
     };
-
-    // Function that Update the budget
-    var updateBudget = function () {
-        // 5. Calculate the budget
-        budgetCtrl.budgetCalculate();
-
-        // 6. Return the budget
-        var answers = budgetCtrl.getBudget();
-
-        // console.log(answer);
-
-        // 7. Display the Budget on th UI
-        UICtrl.diplayBudget(answers);
-    }
-
-
 
     // return object which make our applicaiton start
     return {
