@@ -202,6 +202,12 @@ var budgetController = (function () {
 
 // budgetController.TestMethod(7);
 
+
+
+
+
+
+
 // Create the UI Module with use the IIFE and Closure
 
 var UIcontroller = (function () {
@@ -220,8 +226,34 @@ var UIcontroller = (function () {
         incomeLable: ".budget__income--value",
         expanseLable: ".budget__expenses--value",
         percentageLable: ".budget__expenses--percentage",
-        container: ".container"
+        container: ".container",
+        expansePercentage:".item__percentage"
     };
+
+    var formatNumber = function (num,type){
+        var numsplit,int,dec,sing;
+
+        num = Math.abs(num);
+        num = num.toFixed(2);
+
+        numsplit = num.split('.')
+
+        int = numsplit[0];
+
+        if(int.length > 3)
+        {
+            int = int.substr(0,int.length - 3) + ','+ int.substr(int.length-3,3);
+        }
+
+
+        dec = numsplit[1];
+
+        type === 'exp' ? sing = '-' : sing = '+';
+
+        return sing + ' ' + int + '.' + dec;
+
+    }
+
 
     // Here we need to return the value of the inputs
     // to rather than return the 3 input fields value we use the one object to return the value of the 3 input fields
@@ -254,7 +286,7 @@ var UIcontroller = (function () {
             // replace the %placehodler% with actual value that we get from the object
             update_template = template.replace('%id%', obj.id)
             update_template = update_template.replace('%desc%', obj.description);
-            update_template = update_template.replace('%amount%', obj.amount);
+            update_template = update_template.replace('%amount%', formatNumber(obj.amount,type));
 
             // Update the Element on the UI
             document.querySelector(element).insertAdjacentHTML('beforeend', update_template);
@@ -292,10 +324,12 @@ var UIcontroller = (function () {
         },
 
         diplayBudget: function (obj) {
+            var type;
+            obj.budget > 0 ? type = 'inc' : type = 'exp'
 
-            document.querySelector(DOM_Strings.budgetLable).textContent = obj.budget;
-            document.querySelector(DOM_Strings.incomeLable).textContent = obj.totalIncome;
-            document.querySelector(DOM_Strings.expanseLable).textContent = obj.totalExpanse;
+            document.querySelector(DOM_Strings.budgetLable).textContent = formatNumber(obj.budget,type);
+            document.querySelector(DOM_Strings.incomeLable).textContent = formatNumber(obj.totalIncome,'inc');
+            document.querySelector(DOM_Strings.expanseLable).textContent = formatNumber(obj.totalExpanse,'exp');
 
             if (obj.percentage > 0) {
                 document.querySelector(DOM_Strings.percentageLable).textContent = obj.percentage + "%";
@@ -306,13 +340,41 @@ var UIcontroller = (function () {
             }
         },
 
+        displayPercentage:function(percentages)
+        {
+            var fields = document.querySelectorAll(DOM_Strings.expansePercentage);
 
+            var nodeListForEach = function(list,callback)
+            {   
+                for(var i = 0;i<list.length;i++)
+                {
+                    callback(list[i],i);
+                }
+
+            }
+
+            nodeListForEach(fields,function(curr,index)
+            {
+                if(percentages[index] > 0)
+                    curr.textContent = percentages[index] + '%';
+                else            
+                curr.textContent = '---';
+
+            });
+        },
+        
         //    work like getter that work in OOPs
         getDomString: function () {
             return DOM_Strings;
         },
     };
 })();
+
+
+
+
+
+
 
 // Create the Controller Module with use the IIFE and Closure that is help to connect the UI and Data Module to connect with each other
 // To connect both module we pass both module as an arguments to IIFE
@@ -373,7 +435,8 @@ var Controller = (function (budgetCtrl, UICtrl) {
         // 2. Read percentage from the budget Controller
         var percen = budgetCtrl.getPercentage();
         // 3. Update percentage in UI
-        console.log(percen);
+        // console.log(percen);
+        UICtrl.displayPercentage(percen);
     }
 
     var insertItem = function () {
