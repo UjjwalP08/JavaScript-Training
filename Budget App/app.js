@@ -227,7 +227,8 @@ var UIcontroller = (function () {
         expanseLable: ".budget__expenses--value",
         percentageLable: ".budget__expenses--percentage",
         container: ".container",
-        expansePercentage:".item__percentage"
+        expansePercentage:".item__percentage",
+        monthLable:".budget__title--month"
     };
 
     var formatNumber = function (num,type){
@@ -251,6 +252,16 @@ var UIcontroller = (function () {
         type === 'exp' ? sing = '-' : sing = '+';
 
         return sing + ' ' + int + '.' + dec;
+
+    }
+
+    
+    var nodeListForEach = function(list,callback)
+    {   
+        for(var i = 0;i<list.length;i++)
+        {
+            callback(list[i],i);
+        }
 
     }
 
@@ -344,14 +355,6 @@ var UIcontroller = (function () {
         {
             var fields = document.querySelectorAll(DOM_Strings.expansePercentage);
 
-            var nodeListForEach = function(list,callback)
-            {   
-                for(var i = 0;i<list.length;i++)
-                {
-                    callback(list[i],i);
-                }
-
-            }
 
             nodeListForEach(fields,function(curr,index)
             {
@@ -362,7 +365,44 @@ var UIcontroller = (function () {
 
             });
         },
+
+        displayMonth : function()
+        {
+            var date,month,year;
+            // create the date object
+
+            date = new Date();
+
+            const index = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+            month = date.getMonth();
+
+            year = date.getFullYear();
+
+            document.querySelector(DOM_Strings.monthLable).textContent = index[month] + ' ' + year;
+
+
+
+        },
         
+        changeType : function()
+        {
+            var fiedls;
+
+            fiedls = document.querySelectorAll(
+                DOM_Strings.inputType + ',' +
+                DOM_Strings.inputDesc + ',' +
+                DOM_Strings.inputValue);
+
+                nodeListForEach(fiedls,function(curr)
+                {
+                    curr.classList.toggle('red-focus');
+                });
+
+                document.querySelector(DOM_Strings.add_btn).classList.toggle('red')
+            
+
+        },
+
         //    work like getter that work in OOPs
         getDomString: function () {
             return DOM_Strings;
@@ -408,6 +448,8 @@ var Controller = (function (budgetCtrl, UICtrl) {
             }
         });
         document.querySelector(DOM_class.container).addEventListener('click', deleteItem)
+
+        document.querySelector(DOM_class.inputType).addEventListener('change',UICtrl.changeType);
     };
     // We need to perfom same event on the click_btn and Enter_key_press
     // so if we write the both code in the same function it's not follow the DRY Principle so to follow the DRY(Do not Repeat Your code ) we use the one function or function expression and wrap the code inside it
@@ -503,6 +545,7 @@ var Controller = (function (budgetCtrl, UICtrl) {
     return {
         init: function () {
             console.log("Application is started");
+            UICtrl.displayMonth();
             // initally all the values are 0
             UICtrl.diplayBudget({
                 budget: 0,
