@@ -227,9 +227,17 @@ var UIcontroller = (function () {
 
             // Update the Element on the UI
             document.querySelector(element).insertAdjacentHTML('beforeend', update_template);
-
-
         },
+
+        deleteListItem:function(selectorId)
+        {
+            var ele;
+
+            ele = document.getElementById(selectorId);
+            ele.parentNode.removeChild(ele);
+            
+        },
+
         // Input Fields Create Function execut after the value added
         clearFields: function () {
             var fields, fieldArr;
@@ -357,8 +365,10 @@ var Controller = (function (budgetCtrl, UICtrl) {
             // 1. Delete the item from data structure
             budgetCtrl.deleteItem(type,id);
             // 2. Delete the item from UI
+            UICtrl.deleteListItem(itemId);
 
             // Recalculate the budget and Update it to UI
+            updateBudget()
 
         }
 
