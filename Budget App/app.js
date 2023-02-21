@@ -122,7 +122,7 @@ var budgetController = (function () {
             data.budget = data.total.inc - data.total.exp;
 
             // 3. Calculate the percentage of income we spent
-            if(data.total.inc >0)
+            if (data.total.inc > 0)
                 data.percentage = Math.round((data.total.exp / data.total.inc) * 100);
             else
                 data.percentage = -1;
@@ -130,14 +130,34 @@ var budgetController = (function () {
 
         },
 
-        getBudget:function()
-        {
-            return{
-                budget:data.budget,
-                percentage:data.percentage,
-                totalIncome:data.total.inc,
-                totalExpanse:data.total.exp
+        getBudget: function () {
+            return {
+                budget: data.budget,
+                percentage: data.percentage,
+                totalIncome: data.total.inc,
+                totalExpanse: data.total.exp
             }
+        },
+
+        deleteItem:function(type,id)
+        {
+            var ids,index
+
+           ids =  data.allItems[type].map(function(curr)
+            {
+                return curr.id;
+            })
+            // Map return the set of an array
+            
+            index = ids.indexOf(id);
+
+            if(index !== -1)
+            {
+                data.allItems[type].splice(index,1)
+                // splice method take two parameter 1st is position and 2nd is the no of item you want to delete
+            }
+            
+
         },
 
         testing: function () {
@@ -165,10 +185,11 @@ var UIcontroller = (function () {
         add_btn: ".add__btn",
         incomeContainer: ".income__list",
         expanseContainer: ".expenses__list",
-        budgetLable:".budget__value",
-        incomeLable:".budget__income--value",
-        expanseLable:".budget__expenses--value",
-        percentageLable:".budget__expenses--percentage"
+        budgetLable: ".budget__value",
+        incomeLable: ".budget__income--value",
+        expanseLable: ".budget__expenses--value",
+        percentageLable: ".budget__expenses--percentage",
+        container: ".container"
     };
 
     // Here we need to return the value of the inputs
@@ -193,10 +214,10 @@ var UIcontroller = (function () {
 
             if (type === 'inc') {
                 element = DOM_Strings.incomeContainer;
-                template = '<div class="item clearfix" id="%id%"><div class="item__description">%desc%</div><div class="right clearfix"><div class="item__value">%amount%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
+                template = '<div class="item clearfix" id="inc-%id%"><div class="item__description">%desc%</div><div class="right clearfix"><div class="item__value">%amount%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
             } else if (type === 'exp') {
                 element = DOM_Strings.expanseContainer;
-                template = '<div class="item clearfix" id="%id%"><div class="item__description">%desc%</div><div class="right clearfix"><div class="item__value">%amount%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
+                template = '<div class="item clearfix" id="exp-%id%"><div class="item__description">%desc%</div><div class="right clearfix"><div class="item__value">%amount%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
             }
 
             // replace the %placehodler% with actual value that we get from the object
@@ -231,19 +252,16 @@ var UIcontroller = (function () {
 
         },
 
-        diplayBudget:function(obj)
-        {
-            
+        diplayBudget: function (obj) {
+
             document.querySelector(DOM_Strings.budgetLable).textContent = obj.budget;
             document.querySelector(DOM_Strings.incomeLable).textContent = obj.totalIncome;
             document.querySelector(DOM_Strings.expanseLable).textContent = obj.totalExpanse;
-            
-            if(obj.percentage > 0)
-            {
+
+            if (obj.percentage > 0) {
                 document.querySelector(DOM_Strings.percentageLable).textContent = obj.percentage + "%";
             }
-            else
-            {
+            else {
                 document.querySelector(DOM_Strings.percentageLable).textContent = "---";
 
             }
@@ -266,7 +284,30 @@ var Controller = (function (budgetCtrl, UICtrl) {
     //   Main Controller Code which connect the DATA and UI Controller
 
     // Event Handler code here
+    // Set up the eventlistner in one function which execute only when the our applicaiton is started
 
+    var setupEvnetnListnere = function () {
+        // Fetch the value of Class name for getDomeString
+        var DOM_class = UICtrl.getDomString();
+
+        // Use the Event Listner here for click
+        var click_btn = document.querySelector(DOM_class.add_btn);
+        click_btn.addEventListener("click", insertItem);
+
+        // We need the Enter Key event listner also because when we get the value form the user press the Enter Key at that time also we need to store the value
+
+        var Enter_key_press = document.addEventListener("keypress", function (event) {
+            // keypress event is execute when any key press on the keyboard
+            // To identify the Enter key we use the keycode and to use the key we need to pass and event as an argument in eventlistener function
+
+            // console.log(event);
+
+            if (event.key === "Enter") {
+                insertItem();
+            }
+        });
+        document.querySelector(DOM_class.container).addEventListener('click', deleteItem)
+    };
     // We need to perfom same event on the click_btn and Enter_key_press
     // so if we write the both code in the same function it's not follow the DRY Principle so to follow the DRY(Do not Repeat Your code ) we use the one function or function expression and wrap the code inside it
 
@@ -297,11 +338,36 @@ var Controller = (function (budgetCtrl, UICtrl) {
 
         }
 
-
-        // to check wether function is working or not
-        // console.log("Event Fire");
     };
 
+    var deleteItem = function (event) {
+        var itemId, newitemId, type, id;
+
+        itemId = event.target.parentNode.parentNode.parentNode.parentNode.id
+
+        if (itemId) {
+            newitemId = itemId.split('-')
+
+            // console.log(newitemId);
+            type = newitemId[0];
+            id = parseInt(newitemId[1]);
+
+            // For Deltetion
+
+            // 1. Delete the item from data structure
+            budgetCtrl.deleteItem(type,id);
+            // 2. Delete the item from UI
+
+            // Recalculate the budget and Update it to UI
+
+        }
+
+
+
+
+    };
+
+    // Function that Update the budget
     var updateBudget = function () {
         // 5. Calculate the budget
         budgetCtrl.budgetCalculate();
@@ -315,29 +381,7 @@ var Controller = (function (budgetCtrl, UICtrl) {
         UICtrl.diplayBudget(answers);
     }
 
-    // Set up the eventlistner in one function which execute only when the our applicaiton is started
 
-    var setupEvnetnListnere = function () {
-        // Fetch the value of Class name for getDomeString
-        var DOM_class = UICtrl.getDomString();
-
-        // Use the Event Listner here for click
-        var click_btn = document.querySelector(DOM_class.add_btn);
-        click_btn.addEventListener("click", insertItem);
-
-        // We need the Enter Key event listner also because when we get the value form the user press the Enter Key at that time also we need to store the value
-
-        var Enter_key_press = document.addEventListener("keypress", function (event) {
-            // keypress event is execute when any key press on the keyboard
-            // To identify the Enter key we use the keycode and to use the key we need to pass and event as an argument in eventlistener function
-
-            // console.log(event);
-
-            if (event.key === "Enter") {
-                insertItem();
-            }
-        });
-    };
 
     // return object which make our applicaiton start
     return {
@@ -345,10 +389,10 @@ var Controller = (function (budgetCtrl, UICtrl) {
             console.log("Application is started");
             // initally all the values are 0
             UICtrl.diplayBudget({
-            budget:0,
-            percentage:0,
-            totalIncome:0,
-            totalExpanse:0
+                budget: 0,
+                percentage: 0,
+                totalIncome: 0,
+                totalExpanse: 0
             })
             setupEvnetnListnere();
         }
