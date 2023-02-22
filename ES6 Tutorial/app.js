@@ -1,3 +1,5 @@
+console.log("ES6 Tutorial");
+
 // let and const in ES6
 // let use for the block scope and const use for the constant value
 // let u_name = "Ujjwal"
@@ -13,6 +15,9 @@
 // console.log(str.endsWith('Y'));
 // console.log(str.includes('jj'));
 // console.log(str.repeat(4));
+
+
+
 
 // ---------------------------> Arrow Function <---------------------------
 // const avar = () => {
@@ -41,6 +46,8 @@
 //     console.log(item);    
 // }
 
+
+
 // ---------------------------> Spread Operator <---------------------------
 // no need to write the extra paramerter only use ... operator
 // it is use in the function call
@@ -62,6 +69,9 @@ const mix_family = [...smith_family,...miller_family];
 // mix_family.forEach(ele => console.log(ele));
 
 
+
+
+
 // ---------------------------> Rest parameter <---------------------------
 // use in the function declaration
 // same as the spread operator
@@ -73,6 +83,7 @@ const mix_family = [...smith_family,...miller_family];
 // }
 
 // isFullAge(20,1990,2004,1999,2006,2013);
+
 
 // ---------------------------> Defalut parameter <---------------------------
 // directly declare when you declare the constructor
@@ -91,4 +102,53 @@ const mix_family = [...smith_family,...miller_family];
 
 // let emp2 = new Empolyee('Xyz','Rahi',2022,50000);
 // console.log(emp2);
+
+
+// ---------------------------> Maps <---------------------------
+
+// const map1 = new Map();
+
+// // map1.set(key,value)
+
+// map1.set('question','what is your favourite sports?');
+// map1.set(1,'cricket');
+// map1.set(2,'chess');
+// map1.set(3,'football');
+// map1.set(4,'GOW');
+// map1.set('correct',4);
+// map1.set(true,'Correct answer')
+// map1.set(false,'Wrong!!! try again!!!!')
+
+// // console.log(map1);
+// // console.log(map1.size);
+// // map1.delete(4);
+// // map1.clear()
+// console.log(map1);
+
+// map1.forEach((value,key) => console.log(`In you Map key is ${key} and value is ${value}`));
+
+
+// ---------------------------> Classes in ES6 <---------------------------
+
+// class Person{
+//     constructor(name,BirthYear,job){
+//         this.name = name;
+//         this.BirthYear = BirthYear;
+//         this.job = job;
+//     }
+//     calcage(){
+//          var age = new Date().getFullYear();
+//         age = age - this.BirthYear
+//         console.log(age);
+//     }
+// }
+
+// let p1 = new Person('Ujjwal',2002,'Intern');
+
+// // console.log(p1);
+// // console.log(p1.name);
+// // console.log(p1.BirthYear);
+// // console.log(p1.job);
+// p1.calcage();
+
 
