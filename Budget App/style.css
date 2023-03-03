@@ -213,6 +213,13 @@ h2 {
 .item__description {
     float: left;
 }
+.item__time {
+    float: left;
+    position: relative;
+    left: 5%;
+    font-weight: bolder;
+}
+
 
 .item__value {
     float: left;

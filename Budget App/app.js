@@ -35,32 +35,51 @@
 var budgetController = (function () {
     //   Budget Controller Code
 
+
+
+
     // Adding the constructor for the Income and Expanse 
-    var Expanse = function (id, description, amount) {
+    var Expanse = function (id, description, amount, day, year, hr, min, sec, month, dat) {
+        // this.timest = UIcontroller.displayTimeStamp()
+
         this.id = id;
         this.description = description;
         this.amount = amount;
         this.percentage = -1;
+        this.day = day;
+        this.month = month;
+        this.dat = dat;
+        this.year = year;
+        this.hr = hr;
+        this.min = min;
+        this.sec = sec;
     }
 
-    Expanse.prototype.calcPercentage = function(totalIncome)
-    {
-        if(data.total.inc > 0)
-            this.percentage = Math.round((this.amount/totalIncome) * 100);
+    Expanse.prototype.calcPercentage = function (totalIncome) {
+        if (data.total.inc > 0)
+            this.percentage = Math.round((this.amount / totalIncome) * 100);
         else
             this.percentage = -1;
     }
 
     // Access the Percentage
-    Expanse.prototype.getPercentage = function()
-    {
+    Expanse.prototype.getPercentage = function () {
         return this.percentage;
     }
 
-    var Income = function (id, description, amount) {
+    var Income = function (id, description, amount, day, year, hr, min, sec, month, dat) {
+        // timest = UIcontroller.displayTimeStamp();
+
         this.id = id;
         this.description = description;
         this.amount = amount;
+        this.day = day;
+        this.month = month;
+        this.dat = dat;
+        this.year = year;
+        this.hr = hr;
+        this.min = min;
+        this.sec = sec;
     }
 
     var calculateToatal = function (type) {
@@ -72,11 +91,6 @@ var budgetController = (function () {
 
         data.total[type] = sum;
     };
-
-    // To store the exapnses and income of all the entry we enter we need one data structre to store all entred income and expanses
-    // we use variable but it make too much complex our project to understan our project so,
-    // we use object which store all the value of data
-    // use an array to store the all the income and expanses
 
     var data = {
         allItems: {
@@ -91,12 +105,41 @@ var budgetController = (function () {
         percentage: -1
     }
 
-    // Adding the item in data object and categorize in the inco and exp
-    // For that we need to create a public method
+    function displayTimeStamp() {
+        var date, month, year, dat, day, hour, min, sec;
+        // create the date object
+
+        date = new Date();
+
+        const index = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        const weekday = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+        month = date.getMonth();
+        year = date.getFullYear();
+        dat = date.getDate();
+        day = weekday[date.getDay()];
+        hour = date.getHours();
+        min = date.getMinutes();
+        sec = date.getSeconds();
+
+
+        return [day, index[month], dat, year, hour, min, sec]
+
+    }
 
     return {
         addItems: function (type, desc, amount) {
             var newItem, ID;
+
+            var timest = displayTimeStamp();
+            day = timest[0];
+            month = timest[1];
+            dat = timest[2];
+            year = timest[3];
+            hr = timest[4];
+            min = timest[5];
+            sec = timest[6];
 
             if (data.allItems[type].length > 0) {
                 ID = data.allItems[type][data.allItems[type].length - 1].id + 1;
@@ -105,19 +148,17 @@ var budgetController = (function () {
             else {
                 ID = 0;
             }
-            // we can't uses the index of an array because if we start to remvoe the items it will change the index of item as well as chagne the id of the item also 
-            // if our array is [1,2,3,4,5,6,7,8] and if  we delete the element 3,4,5
-            // so new array is [1,2,6,7,8] if we want to insert new element so we want the 
-            // id = 9 that we get using above ID formula
 
             // create newItem basec on type inc and exp
             if (type === 'exp') {
                 // create the instace of Expanses Constructor
-                newItem = new Expanse(ID, desc, amount);
+                newItem = new Expanse(ID, desc, amount, day, year, hr, min, sec, month, dat);
+
             }
             else if (type === 'inc') {
                 // cerate the instance of Income Constructor
-                newItem = new Income(ID, desc, amount);
+                newItem = new Income(ID, desc, amount, day, year, hr, min, sec, month, dat);
+
             }
             // Push the value of ITEM as per it's type
             data.allItems[type].push(newItem);
@@ -154,40 +195,34 @@ var budgetController = (function () {
             }
         },
 
-        calculatePercentage: function()
-        {
-            data.allItems.exp.forEach(function(curr){
+        calculatePercentage: function () {
+            data.allItems.exp.forEach(function (curr) {
                 curr.calcPercentage(data.total.inc);
             });
         },
 
-        getPercentage: function()
-        {
-            var allPerc = data.allItems.exp.map(function(index){
+        getPercentage: function () {
+            var allPerc = data.allItems.exp.map(function (index) {
                 return index.getPercentage();
             })
 
             return allPerc;
         },
 
-        deleteItem:function(type,id)
-        {
-            var ids,index
+        deleteItem: function (type, id) {
+            var ids, index
 
-           ids =  data.allItems[type].map(function(curr)
-            {
+            ids = data.allItems[type].map(function (curr) {
+                localStorage.removeItem(type + "_" + id);
                 return curr.id;
             })
             // Map return the set of an array
-            
+
             index = ids.indexOf(id);
 
-            if(index !== -1)
-            {
-                data.allItems[type].splice(index,1)
-                // splice method take two parameter 1st is position and 2nd is the no of item you want to delete
+            if (index !== -1) {
+                data.allItems[type].splice(index, 1)
             }
-            
 
         },
 
@@ -198,9 +233,7 @@ var budgetController = (function () {
 
 
 })();
-// Here we use IIFE function to create the module so the all the method and variable in side the budgetController is private which is not able to access outside the IIFE function but here we use the one closure which is able to access outside the IIFE
 
-// budgetController.TestMethod(7);
 
 
 
@@ -227,12 +260,13 @@ var UIcontroller = (function () {
         expanseLable: ".budget__expenses--value",
         percentageLable: ".budget__expenses--percentage",
         container: ".container",
-        expansePercentage:".item__percentage",
-        monthLable:".budget__title--month"
+        expansePercentage: ".item__percentage",
+        monthLable: ".budget__title--month",
+
     };
 
-    var formatNumber = function (num,type){
-        var numsplit,int,dec,sing;
+    var formatNumber = function (num, type) {
+        var numsplit, int, dec, sing;
 
         num = Math.abs(num);
         num = num.toFixed(2);
@@ -241,9 +275,8 @@ var UIcontroller = (function () {
 
         int = numsplit[0];
 
-        if(int.length > 3)
-        {
-            int = int.substr(0,int.length - 3) + ','+ int.substr(int.length-3,3);
+        if (int.length > 3) {
+            int = int.substr(0, int.length - 3) + ',' + int.substr(int.length - 3, 3);
         }
 
 
@@ -255,61 +288,193 @@ var UIcontroller = (function () {
 
     }
 
-    
-    var nodeListForEach = function(list,callback)
-    {   
-        for(var i = 0;i<list.length;i++)
-        {
-            callback(list[i],i);
+
+    var nodeListForEach = function (list, callback) {
+        for (var i = 0; i < list.length; i++) {
+            callback(list[i], i);
         }
 
     }
 
 
-    // Here we need to return the value of the inputs
-    // to rather than return the 3 input fields value we use the one object to return the value of the 3 input fields
+
+    // Keyup event handler
+
+
+
+
     return {
         getInput: function () {
             return {
                 type: document.querySelector(DOM_Strings.inputType).value, // for value +(inc) and for -(exp)
                 description: document.querySelector(DOM_Strings.inputDesc).value,
                 amount: parseFloat(document.querySelector(DOM_Strings.inputValue).value)
-                // if the class name of the field is change we need to change is as many time we use in the places we use so , if the class name is chagne we create and object here which store the name of all the classes we use so if any change happen we need to change on the object value
-                // amount is data type is float not a string so that why we use the parseFloat 
             };
         },
-        showOnUI: function (obj, type) {
+        storeData: function (obj, type) {
 
-            var template, update_template, element;
+            var inc_obj, exp_obj;
 
-            // create the HTML string with placeholder text
-            // % text % it is the placeholder 
-            // here place holder is {%id%}{%desc%}{%amount%}
+            timest = this.displayTimeStamp();
 
-            if (type === 'inc') {
-                element = DOM_Strings.incomeContainer;
-                template = '<div class="item clearfix" id="inc-%id%"><div class="item__description">%desc%</div><div class="right clearfix"><div class="item__value">%amount%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
-            } else if (type === 'exp') {
-                element = DOM_Strings.expanseContainer;
-                template = '<div class="item clearfix" id="exp-%id%"><div class="item__description">%desc%</div><div class="right clearfix"><div class="item__value">%amount%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
+            day = timest[0];
+            month = timest[1];
+            dat = timest[2];
+            year = timest[3];
+            hr = timest[4];
+            min = timest[5];
+            sec = timest[6];
+
+            var store_cap = localStorage.length;
+
+            if (store_cap === 0) {
+                var store_obj = {
+                    id: obj.id,
+                    type: type,
+                    description: obj.description,
+                    amount: obj.amount,
+                    day: obj.day,
+                    month: obj.month,
+                    dat: obj.dat,
+                    year: obj.year,
+                    hr: obj.hr,
+                    min: obj.min,
+                    sec: obj.sec
+
+
+                }
+                localStorage.setItem(type + "_" + obj.id, JSON.stringify(store_obj));
             }
 
-            // replace the %placehodler% with actual value that we get from the object
-            update_template = template.replace('%id%', obj.id)
-            update_template = update_template.replace('%desc%', obj.description);
-            update_template = update_template.replace('%amount%', formatNumber(obj.amount,type));
+            else {
+                if (type === 'inc') {
+                    for (let i = 0; i < store_cap; i++) {
+                        if (localStorage.getItem("inc_" + i) !== null) {
 
-            // Update the Element on the UI
-            document.querySelector(element).insertAdjacentHTML('beforeend', update_template);
+
+                            // console.log(localStorage.getItem("inc_" + i));
+                            inc_obj = localStorage.getItem("inc_" + i)
+                            inc_obj = JSON.parse(inc_obj);
+                            obj.id = inc_obj.id + 1;
+
+
+
+                        } else {
+                            inc_obj = localStorage.getItem("inc_" + 0);
+
+                        }
+                    }
+
+                    // console.log(inc_obj);
+                    // console.log(obj.id);
+                    var store_obj = {
+                        id: obj.id,
+                        type: type,
+                        description: obj.description,
+                        amount: obj.amount,
+                        day: obj.day,
+                        month: obj.month,
+                        dat: obj.dat,
+                        year: obj.year,
+                        hr: obj.hr,
+                        min: obj.min,
+                        sec: obj.sec
+
+                    }
+                    // console.log(obj_id);
+                    localStorage.setItem(type + "_" + obj.id, JSON.stringify(store_obj));
+                }
+                else if (type === 'exp') {
+                    for (let i = 0; i < store_cap; i++) {
+                        if (localStorage.getItem("exp_" + i) !== null) {
+                            console.log(localStorage.getItem("exp_" + i));
+                            exp_obj = localStorage.getItem("exp_" + i);
+                            exp_obj = JSON.parse(exp_obj);
+                            obj.id = exp_obj.id + 1;
+                        }
+                        else {
+                            exp_obj = localStorage.getItem("exp_" + 0)
+                        }
+                    }
+
+                    // console.log(obj.id);
+                    var store_obj = {
+                        id: obj.id,
+                        type: type,
+                        description: obj.description,
+                        amount: obj.amount,
+                        day: obj.day,
+                        month: obj.month,
+                        dat: obj.dat,
+                        year: obj.year,
+                        hr: obj.hr,
+                        min: obj.min,
+                        sec: obj.sec
+
+                    }
+                    // console.log(obj_id);
+                    localStorage.setItem(type + "_" + obj.id, JSON.stringify(store_obj));
+                }
+
+
+            }
+
+
+            this.showOnUI(obj, type)
         },
 
-        deleteListItem:function(selectorId)
-        {
+        deleteListItem: function (selectorId) {
             var ele;
 
             ele = document.getElementById(selectorId);
             ele.parentNode.removeChild(ele);
-            
+
+        },
+
+        showOnUI: function (obj, type) {
+            var template, update_template, element, timest, day, month, dat, year, hr, min, sec;
+
+
+            // timest = this.displayTimeStamp();
+
+            // day = timest[0];
+            // month = timest[1];
+            // dat = timest[2];
+            // year = timest[3];
+            // hr = timest[4];
+            // min = timest[5]
+            // sec = timest[6];
+
+
+
+            if (type === 'inc') {
+                element = DOM_Strings.incomeContainer;
+                template = '<div class="item clearfix" id="inc-%id%"><div class="item__description">%desc%</div> <div class="item__time">%day% %month% %dat%, %year% %hr%:%min%:%sec%</div><div class="right clearfix"><div class="item__value">%amount%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
+                // obj.id = get_obj.id + 1;
+            } else if (type === 'exp') {
+                element = DOM_Strings.expanseContainer;
+                template = '<div class="item clearfix" id="exp-%id%"><div class="item__description">%desc%</div><div class="item__time">%day% %month% %dat%, %year% %hr%:%min%:%sec%</div><div class="right clearfix"><div class="item__value">%amount%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
+                // obj.id = exp_count.id + 1;
+            }
+
+
+            // replace the %placehodler% with actual value that we get from the object
+            update_template = template.replace('%id%', obj.id)
+            update_template = update_template.replace('%day%', obj.day)
+            update_template = update_template.replace('%month%', obj.month)
+            update_template = update_template.replace('%dat%', obj.dat)
+            update_template = update_template.replace('%year%', obj.year)
+            update_template = update_template.replace('%hr%', obj.hr)
+            update_template = update_template.replace('%min%', obj.min)
+            update_template = update_template.replace('%sec%', obj.sec)
+            update_template = update_template.replace('%desc%', obj.description);
+            update_template = update_template.replace('%amount%', formatNumber(obj.amount, type));
+
+
+
+
+            // Update the Element on the UI
+            document.querySelector(element).insertAdjacentHTML('beforeend', update_template);
         },
 
         // Input Fields Create Function execut after the value added
@@ -320,8 +485,6 @@ var UIcontroller = (function () {
 
             fields = document.querySelectorAll(DOM_Strings.inputDesc + ', ' + DOM_Strings.inputValue);
 
-            // Now we use the slice function to slice form the ,
-            // but fiedls is not array it is string value so
             fieldArr = Array.prototype.slice.call(fields);
 
             // Use for-each loop to travarse it
@@ -338,9 +501,9 @@ var UIcontroller = (function () {
             var type;
             obj.budget > 0 ? type = 'inc' : type = 'exp'
 
-            document.querySelector(DOM_Strings.budgetLable).textContent = formatNumber(obj.budget,type);
-            document.querySelector(DOM_Strings.incomeLable).textContent = formatNumber(obj.totalIncome,'inc');
-            document.querySelector(DOM_Strings.expanseLable).textContent = formatNumber(obj.totalExpanse,'exp');
+            document.querySelector(DOM_Strings.budgetLable).textContent = formatNumber(obj.budget, type);
+            document.querySelector(DOM_Strings.incomeLable).textContent = formatNumber(obj.totalIncome, 'inc');
+            document.querySelector(DOM_Strings.expanseLable).textContent = formatNumber(obj.totalExpanse, 'exp');
 
             if (obj.percentage > 0) {
                 document.querySelector(DOM_Strings.percentageLable).textContent = obj.percentage + "%";
@@ -351,41 +514,44 @@ var UIcontroller = (function () {
             }
         },
 
-        displayPercentage:function(percentages)
-        {
+        displayPercentage: function (percentages) {
             var fields = document.querySelectorAll(DOM_Strings.expansePercentage);
 
 
-            nodeListForEach(fields,function(curr,index)
-            {
-                if(percentages[index] > 0)
+            nodeListForEach(fields, function (curr, index) {
+                if (percentages[index] > 0)
                     curr.textContent = percentages[index] + '%';
-                else            
-                curr.textContent = '---';
+                else
+                    curr.textContent = '---';
 
             });
         },
 
-        displayMonth : function()
-        {
-            var date,month,year;
+        displayTimeStamp: function () {
+            var date, month, year, dat, day, hour, min, sec;
             // create the date object
 
             date = new Date();
 
-            const index = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-            month = date.getMonth();
+            const index = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
+            const weekday = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+            month = date.getMonth();
             year = date.getFullYear();
+            dat = date.getDate();
+            day = weekday[date.getDay()];
+            hour = date.getHours();
+            min = date.getMinutes();
+            sec = date.getSeconds();
 
             document.querySelector(DOM_Strings.monthLable).textContent = index[month] + ' ' + year;
 
-
+            return [day, index[month], dat, year, hour, min, sec]
 
         },
-        
-        changeType : function()
-        {
+
+        changeType: function () {
             var fiedls;
 
             fiedls = document.querySelectorAll(
@@ -393,13 +559,12 @@ var UIcontroller = (function () {
                 DOM_Strings.inputDesc + ',' +
                 DOM_Strings.inputValue);
 
-                nodeListForEach(fiedls,function(curr)
-                {
-                    curr.classList.toggle('red-focus');
-                });
+            nodeListForEach(fiedls, function (curr) {
+                curr.classList.toggle('red-focus');
+            });
 
-                document.querySelector(DOM_Strings.add_btn).classList.toggle('red')
-            
+            document.querySelector(DOM_Strings.add_btn).classList.toggle('red')
+
 
         },
 
@@ -407,6 +572,40 @@ var UIcontroller = (function () {
         getDomString: function () {
             return DOM_Strings;
         },
+
+        debounce: function (callback, delay) {
+
+            let timer;
+
+            return function (...args) {
+                if (timer) clearTimeout(timer);
+
+                setTimeout(() => {
+                    callback()
+                }, delay);
+            }
+
+        },
+        suggestion: function () {
+            // console.log("Suggestion show with value " + up);
+
+            let sugges = document.getElementsByClassName('item');
+            let suggest = document.getElementsByClassName('item__description')
+            let val = document.getElementById('inputBox').value;
+            for (var i = 0; i < suggest.length; i++) {
+                if (sugges[i].textContent.toUpperCase().indexOf(val.toUpperCase()) === -1) {
+                    sugges[i].style.display = "none";
+                }
+                else {
+                    // suggest[i].style.display='';
+                    sugges[i].style.display = "";
+
+                }
+
+            }
+        }
+
+
     };
 })();
 
@@ -416,10 +615,6 @@ var UIcontroller = (function () {
 
 
 
-// Create the Controller Module with use the IIFE and Closure that is help to connect the UI and Data Module to connect with each other
-// To connect both module we pass both module as an arguments to IIFE
-
-// we pass as budgetCtrl name beacause if the budgetController Name change we need to change all the time we use inside the Controller module and if we pass argument as  the budgetCtrl name and the  function name is change so we need to only change the name at the end of IIFE where we call the Module which make lot easier in the code
 
 var Controller = (function (budgetCtrl, UICtrl) {
     //   Main Controller Code which connect the DATA and UI Controller
@@ -435,10 +630,8 @@ var Controller = (function (budgetCtrl, UICtrl) {
         var click_btn = document.querySelector(DOM_class.add_btn);
         click_btn.addEventListener("click", insertItem);
 
-        // We need the Enter Key event listner also because when we get the value form the user press the Enter Key at that time also we need to store the value
 
         var Enter_key_press = document.addEventListener("keypress", function (event) {
-            // keypress event is execute when any key press on the keyboard
             // To identify the Enter key we use the keycode and to use the key we need to pass and event as an argument in eventlistener function
 
             // console.log(event);
@@ -449,13 +642,11 @@ var Controller = (function (budgetCtrl, UICtrl) {
         });
         document.querySelector(DOM_class.container).addEventListener('click', deleteItem)
 
-        document.querySelector(DOM_class.inputType).addEventListener('change',UICtrl.changeType);
+        document.querySelector(DOM_class.inputType).addEventListener('change', UICtrl.changeType);
     };
-    // We need to perfom same event on the click_btn and Enter_key_press
-    // so if we write the both code in the same function it's not follow the DRY Principle so to follow the DRY(Do not Repeat Your code ) we use the one function or function expression and wrap the code inside it
 
-     // Function that Update the budget
-     var updateBudget = function () {
+    // Function that Update the budget
+    var updateBudget = function () {
         // 5. Calculate the budget
         budgetCtrl.budgetCalculate();
 
@@ -469,8 +660,7 @@ var Controller = (function (budgetCtrl, UICtrl) {
     }
 
     // Function update Percentage
-    var updatePercentage = function()
-    {
+    var updatePercentage = function () {
         // 1. Calculate the Percentage
         budgetCtrl.calculatePercentage();
 
@@ -487,8 +677,6 @@ var Controller = (function (budgetCtrl, UICtrl) {
         input = UICtrl.getInput();
         // console.log(input);
 
-        // We need to exectue below description field only when there is some string in description and amount is number
-        // no need to execute when the description field empty and amount in NAN and amount is === 0
 
         if (input.description !== "" && !isNaN(input.amount) && input.amount !== 0) {
 
@@ -498,14 +686,14 @@ var Controller = (function (budgetCtrl, UICtrl) {
             // console.log((newItem));
 
             // 3. Add the item to the UI
-            UICtrl.showOnUI(newItem, input.type);
+            UICtrl.storeData(newItem, input.type);
 
             // 4. Clear the input Fields
             UICtrl.clearFields();
 
             // 5. updateBudget
             updateBudget();
-            
+
             // 6. updateBudget
             updatePercentage()
         }
@@ -527,7 +715,7 @@ var Controller = (function (budgetCtrl, UICtrl) {
             // For Deltetion
 
             // 1. Delete the item from data structure
-            budgetCtrl.deleteItem(type,id);
+            budgetCtrl.deleteItem(type, id);
             // 2. Delete the item from UI
             UICtrl.deleteListItem(itemId);
 
@@ -541,11 +729,48 @@ var Controller = (function (budgetCtrl, UICtrl) {
 
     };
 
+   
     // return object which make our applicaiton start
     return {
         init: function () {
             console.log("Application is started");
-            UICtrl.displayMonth();
+            UICtrl.displayTimeStamp();
+
+
+            if (localStorage.length > 0) {
+                for (let i = 0; i < localStorage.length; i++) {
+                    if (localStorage.getItem("inc_" + i) !== null) {
+                        var temp_obj = localStorage.getItem("inc_" + i)
+                        temp_obj = JSON.parse(temp_obj);
+                        budgetCtrl.addItems(temp_obj.type, temp_obj.description, temp_obj.amount);
+                        // var temp_item = {
+                        //     type: temp_obj.type,
+                        //     description: temp_obj.description,
+                        //     amount: temp_obj.amount,
+                        //     day: temp_obj.day
+                        // }
+                        // console.log(temp_obj);
+                        // console.log(temp_item);
+                        UICtrl.showOnUI(temp_obj, temp_obj.type)
+                        // day = timest[0];
+                        // month = timest[1];
+                        // dat = timest[2];
+                        // year = timest[3];
+                        // hr = timest[4];
+                        // min = timest[5]
+                        // sec = timest[6];
+
+                    }
+                    if (localStorage.getItem("exp_" + i) !== null) {
+                        var temp_obj = localStorage.getItem("exp_" + i)
+                        temp_obj = JSON.parse(temp_obj);
+                        budgetCtrl.addItems(temp_obj.type, temp_obj.description, temp_obj.amount);
+                        UICtrl.showOnUI(temp_obj, temp_obj.type)
+
+                    }
+                }
+            }
+
             // initally all the values are 0
             UICtrl.diplayBudget({
                 budget: 0,
@@ -554,9 +779,13 @@ var Controller = (function (budgetCtrl, UICtrl) {
                 totalExpanse: 0
             })
             setupEvnetnListnere();
-        }
+            updateBudget()
+            updatePercentage();
+        },
+        call: UICtrl.debounce(UICtrl.suggestion, 300)
     }
 })(budgetController, UIcontroller);
+
 
 // call the init() function outside
 Controller.init();
